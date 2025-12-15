@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>For You 🧣</title>
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    background: linear-gradient(135deg, #fef6f0 0%, #fde8e0 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: Georgia, serif;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+/* Scarf */
+.scarf-container {
+    position: relative;
+    margin-bottom: 38px;
+}
+
+.scarf {
+    width: 260px;
+    filter: drop-shadow(0 16px 32px rgba(90, 15, 15, 0.25));
+    transform-origin: center center;
+    animation: scarfHug 7s ease-in-out infinite;
+}
+
+@keyframes scarfHug {
+    0%   { transform: scale(1) rotate(0deg); }
+    40%  { transform: scale(1.015) rotate(0.4deg); }
+    55%  { transform: scale(1.045); } /* hug */
+    70%  { transform: scale(1.015); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+/* Text */
+.message-container {
+    text-align: center;
+    max-width: 520px;
+    padding: 0 20px;
+}
+
+h1 {
+    font-size: 2.2em;
+    color: #7b1e1e;
+    margin-bottom: 18px;
+}
+
+.message {
+    font-size: 1.15em;
+    line-height: 1.85;
+    color: #6a1f1f;
+}
+
+.signature {
+    margin-top: 28px;
+    font-size: 1.05em;
+    font-style: italic;
+    color: #8b1a1a;
+}
+
+/* Hearts */
+.heart {
+    position: absolute;
+    font-size: 12px;
+    color: rgba(168, 50, 50, 0.55);
+    opacity: 0;
+    pointer-events: none;
+    animation: heartFloat 4s cubic-bezier(.22,.61,.36,1) forwards;
+}
+
+@keyframes heartFloat {
+    0% {
+        opacity: 0;
+        transform: translateY(0) scale(0.6);
+    }
+    25% {
+        opacity: 0.75;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(var(--rise, -80px)) scale(1);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- Background Music -->
+<audio id="bgMusic" loop>
+    <source src="background1.mp3" type="audio/mpeg">
+</audio>
+
+<div class="scarf-container">
+    <img src="scarf2.png" alt="A warm scarf" class="scarf" id="scarf">
+</div>
+
+<div class="message-container" id="textBlock">
+    <h1>For You</h1>
+
+    <div class="message">
+        Some things aren’t meant to be loud.<br>
+        They’re meant to stay close,<br>
+        to warm you when the world feels cold.<br><br>
+
+        In some stories, a scarf is a quiet feeling—<br>
+        not ownership,<br>
+        not promises,<br>
+        just care,<br>
+        wrapped gently around you.
+    </div>
+
+    <div class="signature">
+        — always, with warmth 🧣
+    </div>
+</div>
+
+<script>
+const scarf = document.getElementById('scarf');
+const textBlock = document.getElementById('textBlock');
+const music = document.getElementById('bgMusic');
+
+/* Start music on first interaction (browser-safe) */
+document.body.addEventListener('click', () => {
+    music.volume = 0.35;
+    music.play();
+}, { once: true });
+
+function createMultipleHearts(element, count = 4, rise = 80) {
+    const rect = element.getBoundingClientRect();
+
+    for (let i = 0; i < count; i++) {
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.textContent = '❤';
+
+        const x = rect.left + rect.width / 2 + (Math.random() * 80 - 40);
+        const y = rect.top + rect.height / 2 + (Math.random() * 20 - 10);
+
+        heart.style.left = x + 'px';
+        heart.style.top = y + 'px';
+        heart.style.setProperty('--rise', `-${rise + Math.random() * 40}px`);
+        heart.style.animationDuration = `${3.5 + Math.random()}s`;
+
+        document.body.appendChild(heart);
+
+        setTimeout(() => heart.remove(), 5000);
+    }
+}
+
+/* Hearts from scarf (main emotion) */
+setInterval(() => {
+    createMultipleHearts(scarf, 5, 90);
+}, 1200);
+
+/* Hearts from text (soft echo) */
+setInterval(() => {
+    createMultipleHearts(textBlock, 2, 45);
+}, 3200);
+</script>
+
+</body>
+</html>
