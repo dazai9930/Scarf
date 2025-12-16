@@ -12,14 +12,27 @@ body {
     min-height: 100vh;
     background: linear-gradient(135deg, #fef6f0 0%, #fde8e0 100%);
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
     font-family: Georgia, serif;
     overflow: hidden;
-    cursor: pointer;
     padding: env(safe-area-inset-top) env(safe-area-inset-right)
              env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* Page wrapper */
+.page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Move content slightly up on mobile */
+@media (max-width: 768px) {
+    .page { transform: translateY(-70px); }
+}
+@media (max-height: 700px) {
+    .page { transform: translateY(-90px); }
 }
 
 /* Scarf */
@@ -27,14 +40,12 @@ body {
     position: relative;
     margin-bottom: 32px;
 }
-
 .scarf {
     width: min(72vw, 260px);
     filter: drop-shadow(0 16px 32px rgba(90, 15, 15, 0.25));
     transform-origin: center center;
     animation: scarfHug 7s ease-in-out infinite;
 }
-
 @keyframes scarfHug {
     0%   { transform: scale(1) rotate(0deg); }
     40%  { transform: scale(1.015) rotate(0.4deg); }
@@ -49,19 +60,16 @@ body {
     max-width: 520px;
     padding: 0 18px;
 }
-
 h1 {
     font-size: clamp(1.6em, 5vw, 2.2em);
     color: #7b1e1e;
     margin-bottom: 16px;
 }
-
 .message {
     font-size: clamp(1em, 4.2vw, 1.15em);
     line-height: 1.8;
     color: #6a1f1f;
 }
-
 .signature {
     margin-top: 24px;
     font-size: clamp(0.95em, 3.8vw, 1.05em);
@@ -78,77 +86,83 @@ h1 {
     pointer-events: none;
     animation: heartFloat 4s cubic-bezier(.22,.61,.36,1) forwards;
 }
-
 @keyframes heartFloat {
-    0% {
-        opacity: 0;
-        transform: translateY(0) scale(0.6);
-    }
-    25% { opacity: 0.75; }
-    100% {
-        opacity: 0;
-        transform: translateY(var(--rise, -80px)) scale(1);
-    }
-}
-
-/* Short screens */
-@media (max-height: 700px) {
-    body {
-        justify-content: flex-start;
-        padding-top: 36px;
-    }
-    .scarf-container {
-        margin-bottom: 22px;
-    }
+    0%   { opacity: 0; transform: translateY(0) scale(0.6); }
+    25%  { opacity: 0.75; }
+    100% { opacity: 0; transform: translateY(var(--rise, -80px)) scale(1); }
 }
 </style>
 </head>
 
 <body>
 
-<!-- Background Music -->
-<audio id="bgMusic" loop>
+<!-- Background Music (starts on first interaction, fades in) -->
+<audio id="bgMusic" loop playsinline>
     <source src="background1.mp3" type="audio/mpeg">
 </audio>
 
-<div class="scarf-container">
-    <img src="scarf2.png" alt="A warm scarf" class="scarf" id="scarf">
-</div>
+<div class="page">
 
-<div class="message-container" id="textBlock">
-    <h1>For You</h1>
-
-    <div class="message">
-        Some things aren’t meant to be loud.<br>
-        They’re meant to stay close,<br>
-        to warm you when the world feels cold.<br><br>
-
-        In some stories, a scarf is a quiet feeling—<br>
-        not ownership,<br>
-        not promises,<br>
-        just care,<br>
-        wrapped gently around you.
+    <div class="scarf-container">
+        <img src="scarf2.png" alt="A warm scarf" class="scarf" id="scarf">
     </div>
 
-    <div class="signature">
-        — always, with warmth 🧣
+    <div class="message-container" id="textBlock">
+        <h1>For You</h1>
+
+        <div class="message">
+            Some things aren’t meant to be loud.<br>
+            They’re meant to stay close,<br>
+            to warm you when the world feels cold.<br><br>
+
+            In some stories, a scarf is a quiet feeling—<br>
+            not ownership,<br>
+            not promises,<br>
+            just care,<br>
+            wrapped gently around you.
+        </div>
+
+        <div class="signature">
+            — always, with warmth 🧣
+        </div>
     </div>
+
 </div>
 
 <script>
+/* ---------- MUSIC (MOBILE-SAFE) ---------- */
+const music = document.getElementById('bgMusic');
+let musicStarted = false;
+
+function startMusic() {
+    if (musicStarted) return;
+    musicStarted = true;
+
+    music.volume = 0;
+    music.play().catch(() => {});
+
+    const targetVolume = 0.6;
+    const step = 0.02;
+
+    const fade = setInterval(() => {
+        if (music.volume < targetVolume) {
+            music.volume = Math.min(music.volume + step, targetVolume);
+        } else {
+            clearInterval(fade);
+        }
+    }, 200);
+}
+
+/* Start on first natural interaction */
+document.addEventListener('touchstart', startMusic, { once: true });
+document.addEventListener('click', startMusic, { once: true });
+
+/* ---------- HEARTS ---------- */
 const scarf = document.getElementById('scarf');
 const textBlock = document.getElementById('textBlock');
-const music = document.getElementById('bgMusic');
-
-/* Start music on first tap (mobile-safe) */
-document.body.addEventListener('click', () => {
-    music.volume = 0.35;
-    music.play();
-}, { once: true });
 
 function createMultipleHearts(element, count = 4, rise = 80) {
     const rect = element.getBoundingClientRect();
-
     for (let i = 0; i < count; i++) {
         const heart = document.createElement('div');
         heart.className = 'heart';
@@ -167,7 +181,7 @@ function createMultipleHearts(element, count = 4, rise = 80) {
     }
 }
 
-/* Hearts */
+/* Continuous hearts */
 setInterval(() => createMultipleHearts(scarf, 5, 90), 1200);
 setInterval(() => createMultipleHearts(textBlock, 2, 45), 3200);
 </script>
